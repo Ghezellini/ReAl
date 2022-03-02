@@ -76,7 +76,7 @@ int main(int argc, const char * argv[]) {
     int iteration = 200000;
 
     vector< double> Alpha( iteration + 1, 1.0);
-    double aCoefficient = 25;
+    double aCoefficient = 25000;
 
     for(int k = 1 ; k<= iteration ; k++){
 
