@@ -38,7 +38,7 @@
 #include <sys/time.h>
 #include <math.h>
 #include "State.h"
-#include "Algorithm.h"
+#include "TestAlgorithm.h"
 #include "MersenneTwister.h"
 
 /*--------------------------------------------------------------------------*/
