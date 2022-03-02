@@ -73,10 +73,10 @@ int main(int argc, const char * argv[]) {
    // allStates.push_back(s);
 
 
-    int iteration = 200000;
+    int iteration = 2000;
 
     vector< double> Alpha( iteration + 1, 1.0);
-    double aCoefficient = 250;
+    double aCoefficient = 25;
 
     for(int k = 1 ; k<= iteration ; k++){
 
