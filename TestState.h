@@ -24,9 +24,9 @@
 /*--------------------------------------------------------------------------*/
 /*----------------------------- DEFINITIONS --------------------------------*/
 /*--------------------------------------------------------------------------*/
-#ifndef State_h
-#define State_h
-                      /* self-identification: #endif at the end of the file */
+#ifndef TestState_h
+#define TestState_h
+/* self-identification: #endif at the end of the file */
 
 /*--------------------------------------------------------------------------*/
 /*------------------------------ INCLUDES ----------------------------------*/
@@ -66,7 +66,7 @@ public:
  * the problem
  * @{ */
 
-  /// Returns the number of fuel stations
+    /// Returns the number of fuel stations
 //  int get_number_fuel_station() const { return NumGasStation; }
 
 /*--------------------------------------------------------------------------*/
@@ -79,15 +79,15 @@ public:
  * These methods allow to read the Variable of the problem.
  *  @{ */
 
-  /// returns the vector of fuel level level variables
-  int get_fuel_level() const {
+    /// returns the vector of fuel level level variables
+    int get_fuel_level() const {
         return FuLevel;
     }
 
 /*--------------------------------------------------------------------------*/
-  /// returns the vector of cumulative driving time
-  double get_cumulative_driving_time() const {
-        return DrivingTime;
+    /// returns the vector of cumulative driving time
+    int get_cumulative_driving_time() const {
+        return DriveTime;
     }
 
 /**@} ----------------------------------------------------------------------*/
@@ -106,19 +106,20 @@ public:
 /*---------------------------------data-------------------------------------*/
 /*--------------------------------------------------------------------------*/
 
- /// The number of fuel station on each route
- //int NumGasStation = 5;
+    /// The number of fuel station on each route
+    //int NumGasStation = 5;
 
 /*-----------------------------variables------------------------------------*/
- /// The fuel level of each tank
-  int  FuLevel;
-  int LB = 100;
-  int UB = 800;
-  int index;
+    /// The fuel level of each tank
+    int  FuLevel;
+    int LB = 100;
+    int UB = 800;
+    int index;
 
- /// The cumulative driving time of the truck.
- double  DrivingTime;
-
+    /// The cumulative driving time of the truck.
+    int  MaxPerDay = 540;
+    int  DriveTime = 0;
+    int  PresentDay = 0;
 
 
 }; // end( class( State ) )
@@ -152,17 +153,17 @@ public:
 /**@} ----------------------------------------------------------------------*/
 /*---------------------------------data-------------------------------------*/
 /*--------------------------------------------------------------------------*/
-  /// The lower bound of each tank
-     int MinimumAmountRefuel = 200;
+    /// The lower bound of each tank
+    int MinimumAmountRefuel = 200;
 
-     int MaximumAmountRefuel = 800;
+    int MaximumAmountRefuel = 800;
 
-  /// The amount of increment
+    /// The amount of increment
     int Increment = 10;
 /*-----------------------------variables------------------------------------*/
 
-  /// The amount of refueling of each tank
-  double Refueling;
+    /// The amount of refueling of each tank
+    double Refueling;
 
 }; // end( class( Action ) )
 
@@ -170,8 +171,8 @@ vector<Action> createAllActions()
 {
     vector<Action> allActions;
     Action a;
-           a.Refueling = 0.0;
-           allActions.push_back(a);
+    a.Refueling = 0.0;
+    allActions.push_back(a);
     for( int i = a.MinimumAmountRefuel/a.Increment; i <= a.MaximumAmountRefuel/a.Increment; i++ )
     {
 
@@ -183,26 +184,46 @@ vector<Action> createAllActions()
 }
 
 
-
-
 vector<State> createAllStates()
 {
     vector<State> allStates;
     State s;
-    //        s.FuLevel = s.LB;
-    //        allStates.push_back(s);
     for( int i = s.LB; i <= s.UB; i++ )
     {
         s.FuLevel = i;
-        s.DrivingTime = 0.0;
         s.index = i - s.LB ;
         allStates.push_back(s);
     }
     return allStates;
 }
 
+/*
+vector<State> createAllStates()
+{
+    vector<State> allStates;
+    State s;
 
-#endif /* State_h */
+    int counter = 0;
+    for( int i = s.LB; i <= s.UB; i++ )
+    {
+        s.FuLevel = i;
+        //  s.index = i - s.LB;
+        for (int j = 0 ; j < s.MaxDriveTime; j++) {
+
+            s.DriveTime = j;
+            for (int k = 0 ; k < s.MaxDay; k++) {
+                s.PresentDay =k;
+                s.index = counter;
+                counter++;
+                allStates.push_back(s);
+            }
+        }
+    }
+    return allStates;
+}*/
+
+
+#endif /* TestState_h */
 
 /*--------------------------------------------------------------------------*/
 /*---------------------------- End File State.h ----------------------------*/

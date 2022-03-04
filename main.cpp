@@ -37,7 +37,7 @@
 #include <ctime>
 #include <sys/time.h>
 #include <math.h>
-#include "State.h"
+#include "TestState.h"
 #include "TestAlgorithm.h"
 #include "MersenneTwister.h"
 
@@ -51,32 +51,38 @@ int main(int argc, const char * argv[]) {
     int N = 50;
     double MPG = 28;
     double Speed = 70;
-
    // vector<double>price = {2.0, 6.0, 2.0, 10, 3.0, 9.0, 9.0, 3.0, 2.0, 15.0};
-    vector<double>price (N, 0.0);
 
     vector<double>Distance (N, 0.0);
+    for (int i =0 ; i< N; i++){
+        Distance[i] = mtrand1.randInt(200) + 30;
+    }
+    int FinalDay = 1+ (60 * (accumulate(Distance.begin(), Distance.end(), 0)) / Speed) / 540;
+    cout<< FinalDay<<endl;
+    vector<vector<double> > price (N, vector<double>(FinalDay, 0.0));
 
     for (int i =0 ; i< N; i++){
-        price[i] = mtrand1.randInt(5)+1;
-        Distance[i] = mtrand1.randInt(200) + 30;
+        for (int j =0 ; j < FinalDay; j++) {
+            price[i][j] = mtrand1.randInt(5) + 1;
+        }
     }
 
     //  vector<double>Distance = {20, 20, 20, 20, 20, 1, 1, 20, 20, 20};
     //State s;
     //s.FuLevel=100;
     //s.DrivingTime = 0.0;
-    double lambda =1.0;
+    double lambda = 1.0;
 
     vector<Action> allActions =createAllActions();
     vector<State> allStates = createAllStates() ;
    // allStates.push_back(s);
 
 
-    int iteration = 2000;
+    int iteration;
+    iteration = 200000;
 
     vector< double> Alpha( iteration + 1, 1.0);
-    double aCoefficient = 25;
+    double aCoefficient = 25000;
 
     for(int k = 1 ; k<= iteration ; k++){
 
@@ -102,9 +108,7 @@ int main(int argc, const char * argv[]) {
     }
 */
 
-    ReAL(allActions, allStates, Alpha, N, iteration, vBar,
-             vHat, decisionRule,  Distance,   MPG,   Speed,
-               price,  lambda, Alpha);
+    ReAL(allActions, allStates, Alpha, N, iteration, vBar,vHat, decisionRule,  Distance,   MPG,   Speed, price,  lambda, Alpha);
 
 
  //  cout << "Nearest value of x :" << round((400*28)/100.0) << "\n";
@@ -113,9 +117,17 @@ int main(int argc, const char * argv[]) {
 
 /*
     for (int i = 0 ; i < allStates.size(); i++){
-        cout<<allStates[i].index<<" "<<allStates[i].FuLevel<<" "<<endl;
-    }
-*/
+        cout<<allStates[i].index<<" "<<allStates[i].FuLevel<<" "<<  allStates[i].DriveTime<<" "<< allStates[i].PresentDay <<" " <<endl;
+    }*/
+/*
+State testS ;
+testS.FuLevel = 100;
+testS.PresentDay = 1;
+testS.DriveTime = 533;
 
+State test = StateTransition( testS, allActions[0], 100.0,  MPG,  Speed);
+cout<<testS.DriveTime<<" "<<testS.PresentDay<<" "<<testS.FuLevel<<" "<<endl;
+cout<<test.DriveTime<<" "<<test.PresentDay<<" "<<test.FuLevel<<" "<<endl;
+ */
     return 0;
 }
