@@ -51,14 +51,16 @@ int main(int argc, const char * argv[]) {
     int N = 50;
     double MPG = 28;
     double Speed = 70;
-   // vector<double>price = {2.0, 6.0, 2.0, 10, 3.0, 9.0, 9.0, 3.0, 2.0, 15.0};
 
     vector<double>Distance (N, 0.0);
     for (int i =0 ; i< N; i++){
         Distance[i] = mtrand1.randInt(200) + 30;
     }
-    int FinalDay = 1+ (60 * (accumulate(Distance.begin(), Distance.end(), 0)) / Speed) / 540;
-    cout<< FinalDay<<endl;
+
+    int FinalDay = 1 + (60 * (accumulate(Distance.begin(), Distance.end(), 0)) / Speed) / 540;
+
+    //cout<< FinalDay<<endl;
+
     vector<vector<double> > price (N, vector<double>(FinalDay, 0.0));
 
     for (int i =0 ; i< N; i++){
@@ -67,11 +69,13 @@ int main(int argc, const char * argv[]) {
         }
     }
 
-    //  vector<double>Distance = {20, 20, 20, 20, 20, 1, 1, 20, 20, 20};
-    //State s;
-    //s.FuLevel=100;
-    //s.DrivingTime = 0.0;
-    double lambda = 1.0;
+    vector<double> lambda (N , 0.0);
+
+    srand( (unsigned)time( NULL ) );
+    for (int i =0 ; i< N; i++){
+            lambda[i] = (float) rand()/RAND_MAX;
+       // cout<< lambda[i]<<endl;
+    }
 
     vector<Action> allActions =createAllActions();
     vector<State> allStates = createAllStates() ;

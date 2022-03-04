@@ -111,16 +111,20 @@ public:
 
 /*-----------------------------variables------------------------------------*/
     /// The fuel level of each tank
-    int  FuLevel;
+    int FuLevel;
+    // lower bound level of the tank
     int LB = 100;
+    // upper bound level of the tank
     int UB = 800;
+
     int index;
 
-    /// The cumulative driving time of the truck.
-    int  MaxPerDay = 540;
+    // maximum driving per day of each truck in minutes
+    int  MaxDrivingPerDay = 540;
+    // driving time of each truck per day
     int  DriveTime = 0;
+    // present day of the time horizon
     int  PresentDay = 0;
-
 
 }; // end( class( State ) )
 
@@ -153,9 +157,9 @@ public:
 /**@} ----------------------------------------------------------------------*/
 /*---------------------------------data-------------------------------------*/
 /*--------------------------------------------------------------------------*/
-    /// The lower bound of each tank
+    // The minimum amount of fueling
     int MinimumAmountRefuel = 200;
-
+    // The maximum amount of fueling
     int MaximumAmountRefuel = 800;
 
     /// The amount of increment

@@ -69,8 +69,8 @@ State StateTransition( State s, Action a,
     j.DriveTime =  s.DriveTime + round(60*Distance/Speed);
     j.PresentDay = s.PresentDay;
 
-    if (j.DriveTime>=j.MaxPerDay){
-        j.DriveTime = round(60*Distance/Speed) - (s.MaxPerDay - s. DriveTime);
+    if (j.DriveTime>=j.MaxDrivingPerDay){
+        j.DriveTime = round(60*Distance/Speed) - (s.MaxDrivingPerDay - s. DriveTime);
         j.PresentDay ++;
     }
 
@@ -147,7 +147,7 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
              vector< vector < vector< double > > > &vBar,
     vector< vector< vector < double > > > &vHat,
     vector<vector< Action > > &decisionRule, vector<double> Distance,
-    double MPG, double Speed, vector< vector< double >> price, double lambda,
+    double MPG, double Speed, vector< vector< double >> price, vector< double > lambda,
         vector< double > alpha )
 {
 
@@ -170,7 +170,7 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
 
     for( int s = 0; s < allStates.size(); s++ ) {
     // Middle 0 means current approximation for vBar and current observation for vHat, they do not get updates in the algorithm
-    vBar[N-1][0][s] = TerminalReward ( allStates[s], price[N-1][price[0].size()-1],  lambda);
+    vBar[N-1][0][s] = TerminalReward ( allStates[s], price[N-1][price[0].size()-1],  lambda[N-1]);
     vHat[N-1][0][s] = vBar[N-1][0][s];
     //   cout<< vBar[N-1][0][s]<<"Khar"<<endl;
     }
@@ -238,7 +238,7 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
 
     j = StateTransition(s, allActions[a], Distance[t], MPG, Speed);
 
-    CurrentContribution[t][k] = (double) ImmediateReward(allActions[a], s, price[t][Day], lambda, t);
+    CurrentContribution[t][k] = (double) ImmediateReward(allActions[a], s, price[t][Day], lambda[t], t);
 
     ExpectedContribution[t][k] = vBar[t + 1][0][j.index];
 
@@ -277,9 +277,9 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     if (k==iteration) {
     for(int t = 0; t < N; t++){
     if (t<N-1)
-    cout<< visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime<<" "<< price[t][visitedStates[t][k].PresentDay]<<" "<< Distance[t]<<" "<<allStates[visitedStates[t][k].index].FuLevel<<" "<< visitedActions[t][k].Refueling<<" "<<allStates[visitedStates[t+1][k].index].FuLevel<<" "<<vBar[t][1][visitedStates[t][k].index]<<" "<< endl;
+    cout<< lambda[t] <<" " <<visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime<<" "<< price[t][visitedStates[t][k].PresentDay]<<" "<< Distance[t]<<" "<<allStates[visitedStates[t][k].index].FuLevel<<" "<< visitedActions[t][k].Refueling<<" "<<allStates[visitedStates[t+1][k].index].FuLevel<<" "<<vBar[t][1][visitedStates[t][k].index]<<" "<< endl;
     else
-        cout<< visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime<<" "<< Distance[t]<<" "<< allStates[visitedStates[t][k].index].FuLevel<<" "<< visitedActions[t][k].Refueling<<" K "<<vBar[t][1][visitedStates[t][k].index]<<" "<< endl;
+        cout<< lambda[t] <<" "<< visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime<<" "<< Distance[t]<<" "<< allStates[visitedStates[t][k].index].FuLevel<<" "<< visitedActions[t][k].Refueling<<" K "<<vBar[t][1][visitedStates[t][k].index]<<" "<< endl;
         }
     }
 
