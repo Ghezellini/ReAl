@@ -65,13 +65,17 @@ State StateTransition( State s, Action a,
 
     j.FuLevel = s.FuLevel + a.Refueling - round((Distance*MPG)/100.0);
 
+  //  if (j.FuLevel < j.LB)   cout<<"Error, this is not possible!"<<endl;
+
     // j.DrivingTime = drTime + Distance/Speed;
     j.DriveTime =  s.DriveTime + round(60*Distance/Speed);
     j.PresentDay = s.PresentDay;
 
+    int incrementDay = (j.DriveTime/j.MaxDrivingPerDay);
+
     if (j.DriveTime>=j.MaxDrivingPerDay){
         j.DriveTime = round(60*Distance/Speed) - (s.MaxDrivingPerDay - s. DriveTime);
-        j.PresentDay ++;
+        j.PresentDay += incrementDay;
     }
 
     j.index = j.FuLevel - j.LB;
@@ -111,7 +115,7 @@ double ImmediateReward ( Action a, State s, double price, double lambda,
     if ( s.FuLevel < s.LB )
         Rew = 1000000000000.0;
     else
-        Rew = price * a.Refueling * ( 1.0 - ( 1.0 - lambda ) );
+        Rew = price * a.Refueling * ( 1.0 + ( 1.0 - lambda ) );
     return Rew;
 } // end immediate reward function
 
@@ -123,9 +127,10 @@ double TerminalReward ( State j, double price, double lambda ) {
     double Rew = 0.0;
 
     if ( j.FuLevel < j.LB )
-        Rew = 10000.0;
+        Rew = 1000000000000.0;
     else
-        Rew = price * (j.UB-j.FuLevel) * ( 1.0 - ( 1.0 - lambda ) );
+      // Rew = 0.0014* (price * (j.UB-j.FuLevel) * ( 1.0 + ( 1.0 - lambda ) ));
+      Rew = 0.0;
     return Rew;
 }// end terminal reward function
 
@@ -161,10 +166,10 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
         }
 
     vector< vector< State> >  visitedStates (N, vector<State> (iteration+1, allStates[0]));
-    vector< vector<double> > CurrentContribution (N, vector<double> (iteration + 1, 50000.0));
+    vector< vector<double> > CurrentContribution (N, vector<double> (iteration + 1, 500000.0));
     // vector< vector<double> > BestCurrentContribution (N, vector<double> (iteration + 1, 0.0));
-    vector< vector<double> > ExpectedContribution (N, vector<double> (iteration + 1, 50000.0));
-    vector< vector<double> > BestRewardSoFar (N, vector<double> (iteration + 1, 50000.0));
+    vector< vector<double> > ExpectedContribution (N, vector<double> (iteration + 1, 500000.0));
+    vector< vector<double> > BestRewardSoFar (N, vector<double> (iteration + 1, 500000.0));
     //vector< vector< vector< double> > > zSmoothed (N, vector< vector<double> > (2, vector<double>(allStates.size(), 0.0)));
     vector< vector< Action> >  visitedActions (N, vector<Action>  (iteration + 1, allActions[0]));
 
@@ -183,11 +188,11 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     State s;
 
     while ( k <= iteration ) {
-    //   if (k < iteration)
-    //       s = allStates[mtrand1.randInt(allStates.size() - 1)];
+       if (k < iteration)
+           s = allStates[mtrand1.randInt(allStates.size() - 1)];
 
-    //    else
-    s = allStates[0];
+       else
+    s = allStates[25]; // Initial fuel level
 
     // s.FuLevel = mtrand1.randInt(s.UB-s.LB) + s.LB ;
 
@@ -195,7 +200,10 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     // Random Initilization
 
     State j;
+
     for (int t = 0 ; t < N-1 ; t++) {  //Exploration loop
+        //
+    //visitedActions[0][k].Refueling = 0.0; // We are not able to refuel in the origin
     visitedStates[t][k] = s;
 
     int index = -1;
@@ -234,7 +242,7 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
 
     for (int a = 0; a < allActions.size(); a++) {
 
-    if (feasibleAction(s, allActions[a], Distance[t], MPG, Speed) == true) {
+    if ( feasibleAction(s, allActions[a], Distance[t], MPG, Speed) ) {
 
     j = StateTransition(s, allActions[a], Distance[t], MPG, Speed);
 
@@ -246,7 +254,7 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     double x = CurrentContribution[t][k] + ExpectedContribution[t][k];
 
 
-    if (x < BestRewardSoFar[t][k]) {
+    if ( x < BestRewardSoFar[t][k] ) {
     decisionRule[s.index][t] = allActions[a];
     visitedActions[t][k] = allActions[a];
     BestRewardSoFar[t][k] = x;
@@ -264,8 +272,16 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     s = visitedStates[t + 1][k];
     s.DriveTime = DrTime;
     s.PresentDay = Day;
+
+    if (t==N-2){
+      //  s = visitedStates[t + 1][k];
+        visitedStates[t+1][k].PresentDay = s.PresentDay;
+        visitedStates[t+1][k].DriveTime = s.DriveTime;
     }
 
+    }
+
+ //   visitedStates[N-1][k] = StateTransition(s, allActions[0], Distance[N-1], MPG, Speed);
 
 
     for (int t = N-2; t>=0 ; t--){
@@ -275,12 +291,39 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     }
 
     if (k==iteration) {
-    for(int t = 0; t < N; t++){
-    if (t<N-1)
-    cout<< lambda[t] <<" " <<visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime<<" "<< price[t][visitedStates[t][k].PresentDay]<<" "<< Distance[t]<<" "<<allStates[visitedStates[t][k].index].FuLevel<<" "<< visitedActions[t][k].Refueling<<" "<<allStates[visitedStates[t+1][k].index].FuLevel<<" "<<vBar[t][1][visitedStates[t][k].index]<<" "<< endl;
-    else
-        cout<< lambda[t] <<" "<< visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime<<" "<< Distance[t]<<" "<< allStates[visitedStates[t][k].index].FuLevel<<" "<< visitedActions[t][k].Refueling<<" K "<<vBar[t][1][visitedStates[t][k].index]<<" "<< endl;
+
+        cout<<"t "<<"PD"<<" "<<"DT"<<" "<<"P"<<"  "<<"D"<<" "<<"F1"<<" "<<"R"<<" "<<"F2"<<" "<<"V"<<endl;
+        double TotRef= 0.0;
+        for(int t = 0; t < N; t++){
+
+            if ( t < N-1 ) {
+        cout  << t<<" "<<visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime << " "
+             << price[t][visitedStates[t][k].PresentDay] << " " << Distance[t] << " "
+             << allStates[visitedStates[t][k].index].FuLevel << " " << visitedActions[t][k].Refueling << " "
+             << allStates[visitedStates[t + 1][k].index].FuLevel << " " << vBar[t][1][visitedStates[t][k].index] << " "
+             << endl;
+
+
+    }
+
+    else{
+                cout  <<t<<" "<<visitedStates[t][k].PresentDay << " " << endl;
+    }
+
+            TotRef += visitedActions[t][k].Refueling;
         }
+            cout<<"Total refueling is "<< TotRef<<endl;
+
+
+/*
+        for (int s = 0 ; s<allStates.size(); s++){
+            cout << allStates[s].FuLevel<<" "<<  vBar[0][1][s] << " " << endl;
+
+            for(int t = 0; t < N; t++) {
+                cout << decisionRule[s][t].Refueling << " " <<endl;
+            }
+        }
+*/
     }
 
     k++;
