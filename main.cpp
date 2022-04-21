@@ -129,7 +129,7 @@ int main(int argc, const char *argv[]) {
 
 
     int iteration;
-    iteration = 500000;
+    iteration = 500;
 
     vector< double> Alpha( iteration + 1, 1.0);
     double aCoefficient = 20000;
