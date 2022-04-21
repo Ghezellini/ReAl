@@ -148,36 +148,35 @@ double FutureApprox(State s) {
 /*--------------------------------------------------------------------------*/
 
 double ReAL(vector<Action> allActions, vector<State> allStates,
-            vector<double> &Alpha, int Number_Routes, vector<int> N, int iteration,
+            vector<double> &Alpha, int N, int iteration,
             vector<vector<vector<double> > > &vBar,
             vector<vector<vector<double> > > &vHat,
-            vector<vector<Action> > &decisionRule, vector<vector<double >> Distance,
-            double MPG, double Speed, vector<vector<vector<double >>> price, vector<vector<double >> lambda,
+            vector<vector<Action> > &decisionRule, vector<double > Distance,
+            double MPG, double Speed, vector<vector<double >> price, vector<double > lambda,
             vector<double> alpha) {
 
     mtrand1.seed(5);
 
-    vector<double> random;
-
-
-    for (int k = 1; k <= iteration; k++) {
-        random.push_back(1.0 / (1 + k - 1));
+    vector< double> random(iteration+1, 0.0);
+   
+    for(int k = 1 ; k<= iteration ; k++){
+     //   random [k] =  (double) 0.2*(1.0 - (double) (k/iteration) );
+            random[k] = (double)(1.0/(1+k-1));
     }
-    for (int r = 0; r < Number_Routes; r++) {
 
-        vector<vector<State> > visitedStates(N[r], vector<State>(iteration + 1, allStates[0]));
-        vector<vector<double> > CurrentContribution(N[r], vector<double>(iteration + 1, 500000.0));
+        vector<vector<State> > visitedStates(N, vector<State>(iteration + 1, allStates[0]));
+        vector<vector<double> > CurrentContribution(N, vector<double>(iteration + 1, 500000.0));
 // vector< vector<double> > BestCurrentContribution (N, vector<double> (iteration + 1, 0.0));
-        vector<vector<double> > ExpectedContribution(N[r], vector<double>(iteration + 1, 500000.0));
-        vector<vector<double> > BestRewardSoFar(N[r], vector<double>(iteration + 1, 500000.0));
+        vector<vector<double> > ExpectedContribution(N, vector<double>(iteration + 1, 500000.0));
+        vector<vector<double> > BestRewardSoFar(N, vector<double>(iteration + 1, 500000.0));
 //vector< vector< vector< double> > > zSmoothed (N, vector< vector<double> > (2, vector<double>(allStates.size(), 0.0)));
-        vector<vector<Action> > visitedActions(N[r], vector<Action>(iteration + 1, allActions[0]));
+        vector<vector<Action> > visitedActions(N, vector<Action>(iteration + 1, allActions[0]));
 
         for (int s = 0; s < allStates.size(); s++) {
 // Middle 0 means current approximation for vBar and current observation for vHat, they do not get updates in the algorithm
-            vBar[N[r] - 1][0][s] = TerminalReward(allStates[s], price[r][N[r] - 1][price[r][0].size() - 1],lambda[r][N[r] - 1]);
-           // vBar[N[r] - 1][0][s] = 0.0;
-            vHat[N[r] - 1][0][s] = vBar[N[r] - 1][0][s];
+            vBar[N - 1][0][s] = TerminalReward(allStates[s], price[N - 1][price[0].size() - 1],lambda[N - 1]);
+           // vBar[N - 1][0][s] = 0.0;
+            vHat[N - 1][0][s] = vBar[N - 1][0][s];
 //   cout<< vBar[N-1][0][s]<<"Khar"<<endl;
         }
 
@@ -189,7 +188,7 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
         State s;
 
         while (k <= iteration) {
-            if (k < iteration)
+            if (k % 10 == 0 )
                 s = allStates[mtrand1.randInt(allStates.size() - 1)];
 
             else
@@ -202,7 +201,7 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
 
             State j;
 
-            for (int t = 0; t < N[r] - 1; t++) {  //Exploration loop
+            for (int t = 0; t < N - 1; t++) {  //Exploration loop
 //
 //visitedActions[0][k].Refueling = 0.0; // We are not able to refuel in the origin
                 visitedStates[t][k] = s;
@@ -210,45 +209,19 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
                 int index = -1;
                 int DrTime = -1;
                 int Day = 0;
-/*
+
             double Random = mtrand1.rand();
-            if (Random <random[k]){
-                Action a;
-                do {
-                     a = allActions[mtrand1.randInt(allActions.size()-1)];
-                }
-                while (feasibleAction(s, a, Distance[t], MPG, Speed) == false);
+ 
 
-                CurrentContribution[t][k] = (double) ImmediateReward(a, s, price[t], lambda, t);
-                //ExpectedContribution[t][k]= FutureApprox(j);
-                //   cout<<t<< " " << k << " "<< allActions[a].Refueling<<" "<<CurrentContribution[t][k]<<endl;
-
-                ExpectedContribution[t][k] = vBar[t + 1][0][j.index];
-
-
-                double x = CurrentContribution[t][k] + ExpectedContribution[t][k];
-
-                decisionRule[s.index][t] = a;
-
-                best = x;
-                //    cout<<t<< " " << k << " "<<decisionRule[s.index][t].Refueling<<" "<<best<<endl;
-
-                visitedStates[t + 1][k][0] = j.FuLevel;
-                visitedStates[t + 1][k][1] = j.DrivingTime;
-                index = (int) j.index;
-
-            }
-*/
-//           else {
 
                 for (int a = 0; a < allActions.size(); a++) {
 
-                    if (feasibleAction(s, allActions[a], Distance[r][t], MPG, Speed)) {
+                    if (feasibleAction(s, allActions[a], Distance [t], MPG, Speed)) {
 
-                        j = StateTransition(s, allActions[a], Distance[r][t], MPG, Speed);
+                        j = StateTransition(s, allActions[a], Distance [t], MPG, Speed);
 
-                        CurrentContribution[t][k] = (double) ImmediateReward(allActions[a], s, price[r][t][Day],
-                                                                             lambda[r][t],
+                        CurrentContribution[t][k] = (double) ImmediateReward(allActions[a], s, price [t][Day],
+                                                                             lambda [t],
                                                                              t);
 
                         ExpectedContribution[t][k] = vBar[t + 1][0][j.index];
@@ -256,6 +229,7 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
 
                         double x = CurrentContribution[t][k] + ExpectedContribution[t][k];
 
+                        double Random = mtrand1.rand();
 
                         if (x < BestRewardSoFar[t][k]) {
                             decisionRule[s.index][t] = allActions[a];
@@ -267,7 +241,7 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
                         }
                     }
                 }
-
+        
 
                 visitedStates[t + 1][k] = allStates[index];
 //  BestRewardSoFar[t][k] = best;
@@ -276,7 +250,7 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
                 s.DriveTime = DrTime;
                 s.PresentDay = Day;
 
-                if (t == N[r] - 2) {
+                if (t == N - 2) {
 //  s = visitedStates[t + 1][k];
                     visitedStates[t + 1][k].PresentDay = s.PresentDay;
                     visitedStates[t + 1][k].DriveTime = s.DriveTime;
@@ -287,7 +261,7 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
 //   visitedStates[N-1][k] = StateTransition(s, allActions[0], Distance[N-1], MPG, Speed);
 
 
-            for (int t = N[r] - 2; t >= 0; t--) {
+            for (int t = N - 2; t >= 0; t--) {
                 vHat[t][1][visitedStates[t][k].index] = BestRewardSoFar[t][k]; // new Observation Value
                 vBar[t][1][visitedStates[t][k].index] = (1.0 - alpha[k]) * vBar[t][0][visitedStates[t][k].index] +
                                                         (alpha[k] *
@@ -300,12 +274,12 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
                 cout << "t " << "PD" << " " << "DT" << " " << "P" << "  " << "D" << " " << "F1" << " " << "R" << " "
                      << "F2" << " " << "V" << endl;
                 double TotRef = 0.0;
-                for (int t = 0; t < N[r]; t++) {
+                for (int t = 0; t < N; t++) {
 
-                    if (t < N[r] - 1) {
+                    if (t < N - 1) {
                         cout << t << " " << visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime
                              << " "
-                             << price[r][t][visitedStates[t][k].PresentDay] << " " << Distance[r][t] << " "
+                             << price [t][visitedStates[t][k].PresentDay] << " " << Distance [t] << " "
                              << allStates[visitedStates[t][k].index].FuLevel << " " << visitedActions[t][k].Refueling
                              << " "
                              << allStates[visitedStates[t + 1][k].index].FuLevel << " "
@@ -334,12 +308,12 @@ double ReAL(vector<Action> allActions, vector<State> allStates,
             }
 
             k++;
-            int h0 = allStates[0].index;
+            int h0 = allStates[25].index;
 //   cout<< k<<" "<<vBar[0][1][h0]<<" "<<endl;
-//cout<<vBar[0][0][h0]<<""<<endl;
+            cout<<k<<" "<<vBar[0][0][h0]<<" "<<endl;
         }
 
-    }
+    
 
 
     return vBar[0][0][allStates.size() - 1];
