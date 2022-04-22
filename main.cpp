@@ -84,67 +84,56 @@ int main(int argc, const char *argv[]) {
  //   for (int r = 0; r < Number_Routes; r++) {
 
 /*
-        vector<vector<double>> Distance(Number_Routes, vector<double>(N[r] - 1, 0.0));
-        for (int i = 0; i < N[r] - 1; i++) {
-            Distance[r][i] = mtrand1.randInt(100) + 30;
-             cout<< Distance[r][i]<<endl;
-        }
-        // Distance[0] = 0;
-        //Distance[r][N[r] - 2] = 1000;
-
+    vector<double>Distance (N-1, 0.0);
+    for (int i =0 ; i< N-1; i++){
+        Distance[i] = mtrand1.randInt(200) + 30;
+    }
+   // Distance[0] = 0;
+    Distance[N-2] = 1000;
 */
-        //  int FinalDay = 1 + (60 * (accumulate(Distance.begin(), Distance.end(), 0)) / Speed) / 540;
-  //      vector<int> FinalDay(Number_Routes, 0.0);
+    int FinalDay = 1 + (60 * (accumulate(Distance.begin(), Distance.end(), 0)) / Speed) / 540;
 
-  //      FinalDay[r] = 1 + (60 * (accumulate(Distance[r].begin(), Distance[r].end(), 0)) / Speed) / 540;
-  //       cout << FinalDay[r] << " F " << endl;
-
-        // vector<vector<double> > price (N, vector<double>(FinalDay, 0.0));
+    cout<< FinalDay<<endl;
 /*
-        vector<vector<vector<double>>> price(Number_Routes,
-                                             vector<vector<double>>(N[r] , vector<double>(FinalDay[r], 0.0)));
-        for (int j = 0; j < FinalDay[r]; j++) {
-            for (int i = 0; i < N[r]; i++) {
-                price[r][i][j] = mtrand1.randInt(5) + 1;
-                price[r][0][j] = 100;
-                price[r][N[r]-1][j] = 100;
-                   cout<< price[r][i][j]<<endl;
-            }
+    vector<vector<double> > price (N, vector<double>(FinalDay, 0.0));
+
+    for (int i =0 ; i< N; i++){
+        for (int j =0 ; j < FinalDay; j++) {
+            price[i][j] = mtrand1.randInt(5) + 1;
+            price[0][j] =  100;
         }
+    }
 
 
-        vector<vector<double>> lambda(Number_Routes, vector<double>(N[r], 0.0));
+    vector<double> lambda (N , 0.0);
 
-        srand((unsigned) time(NULL));
-        for (int i = 0; i < N[r] ; i++) {
-            lambda[r][i] = (float) rand() / RAND_MAX;
-            lambda[r][0] = 0.0;
-            lambda[r][N[r] - 1] = 0.0;
-              cout<< lambda[r][i]<<endl;
-        }
+    srand( (unsigned)time( NULL ) );
+    for (int i =0 ; i< N; i++){
+            lambda[i] = (float) rand()/RAND_MAX;
+       // cout<< lambda[i]<<endl;
+    }
 */
-        vector<Action> allActions = createAllActions();
-        vector<State> allStates = createAllStates();
-        // allStates.push_back(s);
+    vector<Action> allActions =createAllActions();
+    vector<State> allStates = createAllStates() ;
+   // allStates.push_back(s);
 
 
     int iteration;
-    iteration = 500;
+    iteration = 200000;
 
     vector< double> Alpha( iteration + 1, 1.0);
     double aCoefficient = 20000;
 
-        for (int k = 1; k <= iteration; k++) {
+    for(int k = 1 ; k<= iteration ; k++){
 
-            Alpha[k] = (double) (aCoefficient / (aCoefficient + k));
+        Alpha[k] = (double) (aCoefficient/(aCoefficient+k));
 
-        }
-        Action a;
-        a.Refueling = -1;
-        vector<vector<vector<double> > > vBar(N, vector<vector<double> >(2, vector<double>(allStates.size(), 0)));
-        vector<vector<vector<double> > > vHat(N, vector<vector<double> >(2, vector<double>(allStates.size(), 0)));
-        vector<vector<Action> > decisionRule(allStates.size(), (vector<Action>(N, a)));
-
+    }
+    Action a;
+    a.Refueling =0;
+    vector< vector< vector< double> > > vBar (N, vector< vector<double> > (2,vector<double>(allStates.size(), 0.0)));
+    vector< vector< vector< double> > > vHat (N, vector< vector<double> > (2,vector<double>(allStates.size(), 0.0)));
+    vector< vector< Action> > decisionRule (allStates.size(), (vector<Action>(N, a)));
 /*
     for (int i = 0 ; i < allStates.size() ; i++)
     {
@@ -159,14 +148,13 @@ int main(int argc, const char *argv[]) {
     }
 */
 
-        ReAL(allActions, allStates, Alpha, N, iteration, vBar, vHat, decisionRule, Distance, MPG, Speed, price, lambda, Alpha);
+   ReAL(allActions, allStates, Alpha, N, iteration, vBar,vHat, decisionRule,  Distance,   MPG,   Speed, price,  lambda, Alpha);
 
 
- //   }
 
-    //  cout << "Nearest value of x :" << round((400*28)/100.0) << "\n";
+ //  cout << "Nearest value of x :" << round((400*28)/100.0) << "\n";
 
-    //   cout<<allActions.size()<<" "<<endl;
+ //   cout<<allActions.size()<<" "<<endl;
 
 /*
     for (int i = 0 ; i < allStates.size(); i++){

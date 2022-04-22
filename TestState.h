@@ -84,11 +84,6 @@ public:
         return FuLevel;
     }
 
-/*--------------------------------------------------------------------------*/
-    /// returns the vector of cumulative driving time
-    int get_cumulative_driving_time() const {
-        return DriveTime;
-    }
 
 /**@} ----------------------------------------------------------------------*/
 /*-------------------- METHODS FOR INITIALIZING THE State ------------------*/
