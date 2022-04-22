@@ -6,10 +6,6 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/GhezelsofluMR/CLionProjects/ReAl/Algorithm.h
-MersenneTwister.h
-C:/Users/GhezelsofluMR/CLionProjects/ReAl/MersenneTwister.h
-
 C:/Users/GhezelsofluMR/CLionProjects/ReAl/MersenneTwister.h
 iostream
 -
@@ -22,7 +18,13 @@ ctime
 cmath
 -
 
-C:/Users/GhezelsofluMR/CLionProjects/ReAl/State.h
+C:/Users/GhezelsofluMR/CLionProjects/ReAl/TestAlgorithm.h
+MersenneTwister.h
+C:/Users/GhezelsofluMR/CLionProjects/ReAl/MersenneTwister.h
+numeric
+-
+
+C:/Users/GhezelsofluMR/CLionProjects/ReAl/TestState.h
 vector
 -
 
@@ -43,10 +45,10 @@ sys/time.h
 -
 math.h
 -
-State.h
-C:/Users/GhezelsofluMR/CLionProjects/ReAl/State.h
-Algorithm.h
-C:/Users/GhezelsofluMR/CLionProjects/ReAl/Algorithm.h
+TestState.h
+C:/Users/GhezelsofluMR/CLionProjects/ReAl/TestState.h
+TestAlgorithm.h
+C:/Users/GhezelsofluMR/CLionProjects/ReAl/TestAlgorithm.h
 MersenneTwister.h
 C:/Users/GhezelsofluMR/CLionProjects/ReAl/MersenneTwister.h
 
