@@ -35,7 +35,7 @@
 
 #include "MersenneTwister.h"
 #include <numeric>
-
+#include<algorithm>
 /*--------------------------------------------------------------------------*/
 /*------------------------------ NAMESPACE ---------------------------------*/
 /*--------------------------------------------------------------------------*/
@@ -65,7 +65,7 @@ State StateTransition( State s, Action a,
 
     j.FuLevel = s.FuLevel + a.Refueling - (round((Distance*MPG)/100.0) + 2*round((Detour*MPG)/100.0));
     if (a.Refueling == 0 ){
-        j.FuLevel = s.FuLevel + a.Refueling - round((Distance*MPG)/100.0);
+        j.FuLevel = s.FuLevel - round((Distance*MPG)/100.0);
     }
   //  if (j.FuLevel < j.LB)   cout<<"Error, this is not possible!"<<endl;
 
@@ -103,14 +103,14 @@ bool feasibleAction( State s, Action a,  double Distance, double Detour, double 
     bool cond = false;
 
     State j = StateTransition(  s,  a, Distance, Detour, MPG,  Speed );
+
     if (a.Refueling == 0 ) {
-        if (a.Refueling <= s.UB - s.FuLevel &&
-            j.FuLevel == s.FuLevel + a.Refueling - round((Distance * MPG) / 100.0) &&
+        if (j.FuLevel == s.FuLevel - round((Distance * MPG) / 100.0) &&
             j.FuLevel <= s.UB && j.FuLevel >= s.LB) {
             cond = true;
         }
     } else {
-        if (a.Refueling <= s.UB - s.FuLevel &&
+        if (a.Refueling <=   s.UB - s.FuLevel &&
             j.FuLevel == s.FuLevel + a.Refueling - round((Distance * MPG) / 100.0) - 2*round((Detour * MPG) / 100.0) &&
             j.FuLevel <= s.UB && j.FuLevel >= s.LB) {
             cond = true;
@@ -128,7 +128,7 @@ double ImmediateReward ( Action a, State s, double price, double lambda,
                          int t ) {
     double Rew = 0.0;
 
-    if ( s.FuLevel < s.LB )
+    if ( s.FuLevel < s.LB && s.FuLevel > s.UB )
         Rew = 1000000000000.0;
     else
         Rew = price * a.Refueling * ( 1.0 + ( 1.0 - lambda ) );
@@ -142,11 +142,11 @@ double ImmediateReward ( Action a, State s, double price, double lambda,
 double TerminalReward ( State j, double price, double lambda ) {
     double Rew = 0.0;
 
-    if ( j.FuLevel < j.LB )
+    if ( j.FuLevel < j.LB && j.FuLevel > j.UB )
         Rew = 1000000000000.0;
     else
-      // Rew = 0.014* (price * (j.UB-j.FuLevel) * ( 1.0 + ( 1.0 - lambda ) ));
-      //Rew = 0.0;
+      //Rew = 0.00014* (price * (j.UB-j.FuLevel) * ( 1.0 + ( 1.0 - lambda ) ));
+      Rew = 0.0;
     return Rew;
 }// end terminal reward function
 
@@ -212,18 +212,18 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
            s = allStates[mtrand1.randInt(allStates.size() - 1)];
 
        else
-    s = allStates[125]; // Initial fuel level
+    s = allStates[325]; // Initial fuel level
     State j;
 
     for (int t = 0 ; t < N-1 ; t++) {  //Exploration loop
         //
-    //visitedActions[0][k].Refueling = 0.0; // We are not able to refuel in the origin
     visitedStates[t][k] = s;
 
     int index = -1;
     int DrTime = -1;
     int Day = 0;
-
+    int Replication = 5;
+/*
             double Random = mtrand1.rand();
             if ( Random < random[k]){
                 Action action;
@@ -233,10 +233,8 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
                 while (!feasibleAction(s, action, Distance[t], Detour[t], MPG, Speed));
                 j = StateTransition(s, action, Distance[t], Detour[t], MPG, Speed);
                 CurrentContribution[t][k] = (double) ImmediateReward(action, s, price[t][Day], lambda[t], t);
-               // ExpectedContribution[t][k]= FutureApprox(j);
-                //   cout<<t<< " " << k << " "<< allActions[a].Refueling<<" "<<CurrentContribution[t][k]<<endl;
-
-                ExpectedContribution[t][k] = vBar[t + 1][0][j.index];
+                ExpectedContribution[t][k]= FutureApprox(j);
+                   cout<<t<< " " << k << " "<< action.Refueling<<" "<<CurrentContribution[t][k]<<endl;
 
                 double x = CurrentContribution[t][k] + ExpectedContribution[t][k];
 
@@ -252,8 +250,8 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
               Day = (int) j.PresentDay;
 
             }
-
-          else {
+*/
+      //   else {
 
                 for (int a = 0; a < allActions.size(); a++) {
 
@@ -279,7 +277,7 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
                     }
                 }
 
-           }
+        //  }
     visitedStates[t + 1][k] = allStates[index];
     //  BestRewardSoFar[t][k] = best;
     // Cuurent Vhat s then we smoothed it with previous vBar ---> update VBar
@@ -288,14 +286,14 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     s.PresentDay = Day;
 
     if ( t == N-2 ){
-      //  s = visitedStates[t + 1][k];
+        s = visitedStates[t + 1][k];
         visitedStates[t+1][k].PresentDay = s.PresentDay;
         visitedStates[t+1][k].DriveTime = s.DriveTime;
     }
 
     }
 
- //   visitedStates[N-1][k] = StateTransition(s, allActions[0], Distance[N-1], MPG, Speed);
+ //   visitedStates[N-1][k] = StateTransition(s, allActions[0], Distance[N-1], Detour[N-1], MPG, Speed);
 
 
     for (int t = N-2; t>=0 ; t--){
@@ -304,7 +302,7 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     vBar[t][0][visitedStates[t][k].index] = (double) vBar[t][1][visitedStates[t][k].index];
     }
 
-    if (k==iteration) {
+    if (k == iteration) {
 
         cout<<"t "<<"PD"<<" "<<"DT"<<" "<<"P"<<"  "<<"D"<<"  "<<"De"<<" "<<"F1"<<" "<<"R"<<" "<<"F2"<<" "<<"V"<<endl;
         double TotRef= 0.0;
@@ -313,8 +311,8 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
         for(int t = 0; t < N; t++){
 
             if ( t < N-1 ) {
-        cout  << t<<" "<<visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime << " "
-             << price[t][visitedStates[t][k].PresentDay] << " " << Distance[t] << " " << Detour[t] << " "
+        cout  << t <<" "<<visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime << " "
+             << price[t][visitedStates[t][k].PresentDay] << " " << lambda[t] << " "<< Distance[t] << " " << Detour[t] << " "
              << allStates[visitedStates[t][k].index].FuLevel << " " << visitedActions[t][k].Refueling << " "
              << allStates[visitedStates[t + 1][k].index].FuLevel << " " << vBar[t][1][visitedStates[t][k].index] << " "
              << endl;
@@ -323,7 +321,8 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     }
 
     else{
-                //cout << t << " " << visitedStates[t][k].PresentDay << " " << endl;
+                cout  << t <<" "<<visitedStates[t][k].PresentDay << " " << visitedStates[t][k].DriveTime << " "
+                      << price[t][visitedStates[t][k].PresentDay] << " " << lambda[t] << endl;
     }
 
             TotRef += visitedActions[t][k].Refueling;
@@ -341,8 +340,8 @@ double ReAL( vector<Action>allActions, vector<State>allStates,
     }
 
     k++;
-    int h0 =allStates[125].index;
-    //   cout<< k<<" "<<vBar[0][1][h0]<<" "<<endl;
+    int h0 =allStates[325].index;
+   //    cout<< k<<" "<<vBar[0][1][h0]<<" "<<endl;
   //  cout<<vBar[0][0][h0]<<""<<endl;
     }
 
