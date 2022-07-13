@@ -78,10 +78,10 @@ int main(int argc, const char *argv[]) {
     vector<vector<double> > price (N, vector<double>(FinalDay, 0.0));
     double variation = 0.0;
     for (int d = 0; d < FinalDay ; d++) {
-        variation = RL.uniform(0.95, 1.05);
+        variation = RL.uniform(0.9, 1.1);
         for (int j = 0; j < N; j++) {
-            price[j][d] = price_0[j];
-           // price[j][d] =  variation * price_0[j];
+            //price[j][d] = price_0[j];
+            price[j][d] =  variation * price_0[j];
             //cout << "price[" << j << "][" << d << "] = " << price[j][d] << endl;
         }
 
